@@ -185,7 +185,7 @@ fn compile_to_instrs(e: &Expr, si: i32, env: &mut HashMap<String, i32>, current_
                 return vec
             }
             if !env.contains_key(id) {
-                panic!("Unbound variable identifier {:?} {id}", env)
+                panic!("Unbound variable identifier {id}")
             }
             vec.push(Instr::IMov(Val::Reg(Reg::RAX), Val::RegOffset(Reg::RSP, *env.get(id).unwrap() * 8)));
             vec
