@@ -6,7 +6,7 @@ use std::collections::HashSet;
 
 use sexp::Atom::*;
 use sexp::*;
-//TODO: overflow
+
 #[derive(Debug)]
 enum Val {
     Reg(Reg),
@@ -425,6 +425,9 @@ fn compile_set(name: &String, expr: &Box<Expr>, si: i32, env: &mut HashMap<Strin
 
 fn compile_block(exprs: &Vec<Expr>, si: i32, env: &mut HashMap<String, i32>, current_break: &String, label_count: &mut i32) -> Vec<Instr> {
     let mut vec: Vec<Instr> = vec![];
+    if exprs.is_empty() {
+        panic!("Invalid block, no subexpressions")
+    }
     for expr in exprs {
         append_instr(&mut vec, compile_to_instrs(expr, si, env, current_break, label_count))
     }
