@@ -225,13 +225,13 @@ fn compile_op1(op: &Op1, e: &Box<Expr>, si: i32, env: &mut HashMap<String, i32>,
             append_instr(&mut vec, compile_to_instrs(e, si, env, current_break, label_count));
             check_is_number(&mut vec);
             vec.push(Instr::IAdd(Val::Reg(Reg::RAX), Val::Imm(2)));
-            check_overflow(&mut vec);
+            check_overflow_plus(&mut vec);
         }
         Op1::Sub1 => {
             append_instr(&mut vec, compile_to_instrs(e, si, env, current_break, label_count));
             check_is_number(&mut vec);
             vec.push(Instr::ISub(Val::Reg(Reg::RAX), Val::Imm(2)));
-            check_overflow(&mut vec);
+            check_overflow_minus(&mut vec);
         }
         Op1::IsBool => {
             append_instr(&mut vec, compile_to_instrs(e, si, env, current_break, label_count));
@@ -263,7 +263,7 @@ fn compile_op2(op: & Op2, e1: &Box<Expr>, e2: &Box<Expr>, si: i32, env: &mut Has
             append_instr(&mut vec, e2_instr);
             check_is_number(&mut vec);
             vec.push(Instr::IAdd(Val::Reg(Reg::RAX), Val::RegOffset(Reg::RSP, si * 8)));
-            check_overflow(&mut vec);
+            check_overflow_plus(&mut vec);
         }
         Op2::Minus => {
             append_instr(&mut vec, e1_instr);
@@ -272,7 +272,7 @@ fn compile_op2(op: & Op2, e1: &Box<Expr>, e2: &Box<Expr>, si: i32, env: &mut Has
             append_instr(&mut vec, e2_instr);
             check_is_number(&mut vec);
             vec.push(Instr::ISub(Val::RegOffset(Reg::RSP, si * 8), Val::Reg(Reg::RAX)));
-            check_overflow(&mut vec);
+            check_overflow_minus(&mut vec);
             vec.push(Instr::IMov(Val::Reg(Reg::RAX), Val::RegOffset(Reg::RSP, si * 8)));
         }
         Op2::Times => {
@@ -283,7 +283,7 @@ fn compile_op2(op: & Op2, e1: &Box<Expr>, e2: &Box<Expr>, si: i32, env: &mut Has
             check_is_number(&mut vec);
             vec.push(Instr::RightShift(Val::Reg(Reg::RAX), Val::Imm(1)));
             vec.push(Instr::IMul(Val::Reg(Reg::RAX), Val::RegOffset(Reg::RSP, si * 8)));
-            check_overflow(&mut vec);
+            check_overflow_times(&mut vec);
         }
         Op2::Greater => {
             append_instr(&mut vec, e1_instr);
@@ -487,8 +487,20 @@ fn check_equal_type(vec: &mut Vec<Instr>, val1: Val, val2: Val) {
     vec.push(Instr::JNE(Val::Label("throw_error".to_string())));
 }
 
-fn check_overflow(vec: &mut Vec<Instr>) {
+fn check_overflow_times(vec: &mut Vec<Instr>) {
     vec.push(Instr::IMov(Val::Reg(Reg::RBX), Val::Imm(3)));
+    vec.push(Instr::CMovo(Val::Reg(Reg::RDI), Val::Reg(Reg::RBX)));
+    vec.push(Instr::JO(Val::Label("throw_error".to_string())));
+}
+
+fn check_overflow_minus(vec: &mut Vec<Instr>) {
+    vec.push(Instr::IMov(Val::Reg(Reg::RBX), Val::Imm(4)));
+    vec.push(Instr::CMovo(Val::Reg(Reg::RDI), Val::Reg(Reg::RBX)));
+    vec.push(Instr::JO(Val::Label("throw_error".to_string())));
+}
+
+fn check_overflow_plus(vec: &mut Vec<Instr>) {
+    vec.push(Instr::IMov(Val::Reg(Reg::RBX), Val::Imm(5)));
     vec.push(Instr::CMovo(Val::Reg(Reg::RDI), Val::Reg(Reg::RBX)));
     vec.push(Instr::JO(Val::Label("throw_error".to_string())));
 }
