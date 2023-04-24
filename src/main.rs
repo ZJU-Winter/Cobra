@@ -272,7 +272,7 @@ fn compile_op2(op: & Op2, e1: &Box<Expr>, e2: &Box<Expr>, si: i32, env: &mut Has
             append_instr(&mut vec, e2_instr);
             check_is_number(&mut vec);
             vec.push(Instr::ISub(Val::RegOffset(Reg::RSP, si * 8), Val::Reg(Reg::RAX)));
-            // check_overflow(&mut vec);
+            check_overflow(&mut vec);
             vec.push(Instr::IMov(Val::Reg(Reg::RAX), Val::RegOffset(Reg::RSP, si * 8)));
         }
         Op2::Times => {
