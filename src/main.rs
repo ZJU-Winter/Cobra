@@ -346,30 +346,32 @@ fn compile_op2(op: & Op2, e1: &Box<Expr>, e2: &Box<Expr>, si: i32, env: &mut Has
 fn complie_let(bindings: &Vec<(String, Expr)>, body: &Box<Expr>, si: i32, env: &mut HashMap<String, i32>, current_break: &String, label_count: &mut i32) -> Vec<Instr> {
     let mut vec: Vec<Instr> = vec![];
     let mut set: HashSet<String> = HashSet::new();
+    let mut current_env = env.clone();
     let length = bindings.len() as i32;
     for binding in bindings {
         if set.contains(&binding.0) {
             panic!("Duplicate binding")
         }
-        if binding.0.eq("let") || binding.0.eq("add1") || binding.0.eq("sub1") 
+        if binding.0.eq("let") || binding.0.eq("add1") || binding.0.eq("sub1")
         ||
-        binding.0.eq("break") || binding.0.eq("set!") || binding.0.eq("loop") 
+        binding.0.eq("break") || binding.0.eq("set!") || binding.0.eq("loop")
         ||
-        binding.0.eq("if") || binding.0.eq("block") || binding.0.eq("input"){
+        binding.0.eq("if") || binding.0.eq("block") || binding.0.eq("input") {
             panic!("Invalid variable name, can't use the {} keyword", binding.0)
         }
         set.insert(binding.0.clone());
     }
     for (i, binding) in bindings.iter().enumerate() {
-        let mut nenv = env.clone();
+        let mut nenv = current_env.clone();
         append_instr(&mut vec, compile_to_instrs(&binding.1, si + i as i32, &mut nenv, current_break, label_count));
-        env.insert(binding.0.clone(), si + i as i32);
+        current_env.insert(binding.0.clone(), si + i as i32);
         vec.push(Instr::IMov(Val::RegOffset(Reg::RSP, (si + i as i32) * 8), Val::Reg(Reg::RAX)));
     }
-    append_instr(&mut vec, compile_to_instrs(body, si + length, env, current_break, label_count));
-    for binding in bindings {
-        env.remove(&binding.0);
-    }
+    append_instr(&mut vec, compile_to_instrs(body, si + length, &mut current_env, current_break, label_count));
+    // for binding in bindings {
+    //     println!("removed:{}, {}", &binding.0, env.get(&binding.0).unwrap());
+    //     env.remove(&binding.0);
+    // }
     vec
 }
 
