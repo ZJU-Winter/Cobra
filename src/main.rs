@@ -562,10 +562,10 @@ fn instr_to_str(i: &Instr) -> String {
             format!("{}:", val_to_str(label))
         }
         Instr::LeftShift(val1, val2) => {
-            format!("shl {}, {}", val_to_str(val1), val_to_str(val2))
+            format!("sal {}, {}", val_to_str(val1), val_to_str(val2))
         }
         Instr::RightShift(val1, val2) => {
-            format!("shr {}, {}", val_to_str(val1), val_to_str(val2))
+            format!("sar {}, {}", val_to_str(val1), val_to_str(val2))
         }
     }
 }
