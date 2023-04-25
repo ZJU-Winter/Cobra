@@ -368,10 +368,6 @@ fn complie_let(bindings: &Vec<(String, Expr)>, body: &Box<Expr>, si: i32, env: &
         vec.push(Instr::IMov(Val::RegOffset(Reg::RSP, (si + i as i32) * 8), Val::Reg(Reg::RAX)));
     }
     append_instr(&mut vec, compile_to_instrs(body, si + length, &mut current_env, current_break, label_count));
-    // for binding in bindings {
-    //     println!("removed:{}, {}", &binding.0, env.get(&binding.0).unwrap());
-    //     env.remove(&binding.0);
-    // }
     vec
 }
 
